@@ -3,12 +3,22 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public event EventHandler OnSelectedCounterChanged;
+
+    public class OnSelectedCounterChangedEventArgs : EventArgs
+    {
+        public ClearCounter selectedCounter;
+    }
+    
     [SerializeField] private float _speed = 0f;
     [SerializeField] private float _rotSpeed = 0f;
-    [SerializeField] private LayerMask counterLayerMask; 
+    [SerializeField] private LayerMask counterLayerMask;
+    
+    
     public GameInput _gameInput;
     private bool _isWalking;
     private Vector3 lastInteractDir;
+    private ClearCounter selectedCounter;
 
 
     private void Start()
@@ -18,20 +28,9 @@ public class Player : MonoBehaviour
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
-        float interactDistance = 2f; 
-        Vector2 inputVector = _gameInput.GetMovementVectorNormalized();
-        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
-        if (moveDir != Vector3.zero)
+        if (selectedCounter != null)
         {
-            lastInteractDir = moveDir;
-        }
-
-        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, counterLayerMask))
-        {
-            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
-            {
-                clearCounter.Interact();
-            }
+            selectedCounter.Interact();
         }
     }
 
@@ -55,9 +54,21 @@ public class Player : MonoBehaviour
         {
             if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
             {
-                
+                if (clearCounter != selectedCounter)
+                {
+                    selectedCounter = clearCounter;
+                }
+            }
+            else
+            {
+                selectedCounter = null; 
             }
         }
+        else
+        {
+            selectedCounter = null;
+        }
+        Debug.Log(selectedCounter);
     }
     private void HandleMovement()
     {
@@ -87,7 +98,7 @@ public class Player : MonoBehaviour
                 }
                 else
                 {
-                    
+                    //нету движения по осям
                 }
             }
         }
