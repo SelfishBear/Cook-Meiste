@@ -1,9 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IKitchenObjectParent
 {
-    public event EventHandler OnSelectedCounterChanged;
+    
+    
+    public static Player Instance { get; private set; }
+    public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
 
     public class OnSelectedCounterChangedEventArgs : EventArgs
     {
@@ -19,6 +23,9 @@ public class Player : MonoBehaviour
     private bool _isWalking;
     private Vector3 lastInteractDir;
     private ClearCounter selectedCounter;
+    private KitchenObjects _kitchenObjects;
+    [SerializeField] private Transform kitchenObjectHoldPoint;
+
 
 
     private void Start()
@@ -30,8 +37,19 @@ public class Player : MonoBehaviour
     {
         if (selectedCounter != null)
         {
-            selectedCounter.Interact();
+            selectedCounter.Interact(this);
         }
+    }
+
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Debug.LogError("There is more than one Player instance");
+        }
+
+        Instance = this;
     }
 
     private void Update()
@@ -56,19 +74,19 @@ public class Player : MonoBehaviour
             {
                 if (clearCounter != selectedCounter)
                 {
-                    selectedCounter = clearCounter;
+                   SetSelectedCounter(clearCounter);
                 }
             }
             else
             {
-                selectedCounter = null; 
+               SetSelectedCounter(null); 
+               
             }
         }
         else
         {
-            selectedCounter = null;
+            SetSelectedCounter(null);
         }
-        Debug.Log(selectedCounter);
     }
     private void HandleMovement()
     {
@@ -114,6 +132,40 @@ public class Player : MonoBehaviour
     {
         return _isWalking;
     }
-    
+
+    private void SetSelectedCounter(ClearCounter selectedCounter)
+    {
+        this.selectedCounter = selectedCounter;
+        OnSelectedCounterChanged?.Invoke(this, new OnSelectedCounterChangedEventArgs
+        {
+            selectedCounter = selectedCounter
+        });
+    }
+
+
+    public Transform GetKitchenFollowTransform()
+    {
+        return kitchenObjectHoldPoint;
+    }
+
+    public void SetKitchenObjects(KitchenObjects _kitchenObjects)
+    {
+        this._kitchenObjects = _kitchenObjects;
+    }
+
+    public KitchenObjects GetKitchenObjects()
+    {
+        return _kitchenObjects;
+    }
+
+    public void ClearKitchenObjects()
+    { 
+        _kitchenObjects = null;
+    }
+
+    public bool HasKitchenObjects()
+    {
+        return _kitchenObjects != null;
+    }
 }
 
