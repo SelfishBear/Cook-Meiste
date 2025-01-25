@@ -40,6 +40,13 @@ public class CuttingCounter : BaseCounter, IHasProgress
             if (player.HasKitchenObjects())
             {
                 //Player carrying something
+                if (player.GetKitchenObjects().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+                {
+                    if (plateKitchenObject.TryAddIngredient(GetKitchenObjects().GetKitchenObjectsSo()))
+                    {
+                        GetKitchenObjects().DestroySelf();
+                    }
+                }
             }
             else
             {

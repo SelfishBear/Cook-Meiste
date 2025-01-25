@@ -4,7 +4,7 @@ using UnityEngine;
 public class StoveCounter : BaseCounter, IHasProgress
 {
     public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged; 
-
+ 
     public event EventHandler<OnStateChangedEventArgs> OnStateChanged;
     public class OnStateChangedEventArgs : EventArgs
     {
@@ -136,6 +136,24 @@ public class StoveCounter : BaseCounter, IHasProgress
             if (player.HasKitchenObjects())
             {
                 //Player carrying something
+                if (player.GetKitchenObjects().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+                {
+                    if (plateKitchenObject.TryAddIngredient(GetKitchenObjects().GetKitchenObjectsSo()))
+                    {
+                        GetKitchenObjects().DestroySelf();
+                        
+                        _state = State.Idle;
+                        OnStateChanged?.Invoke(this, new OnStateChangedEventArgs
+                        {
+
+                            state = _state
+                        });
+                        OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
+                        {
+                            progressNormalized = 0f
+                        });
+                    }
+                }
             }
             else
             {

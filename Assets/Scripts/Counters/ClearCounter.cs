@@ -2,10 +2,8 @@ using UnityEngine;
 
 public class ClearCounter : BaseCounter
 {
+    [SerializeField] private KitchenObjectsSO _kitchenObjectsSo;
 
-
-   [SerializeField] private KitchenObjectsSO _kitchenObjectsSo;
-   
     public override void Interact(Player player)
     {
         if (!HasKitchenObjects())
@@ -27,6 +25,24 @@ public class ClearCounter : BaseCounter
             if (player.HasKitchenObjects())
             {
                 //Player carrying something
+                if (player.GetKitchenObjects().TryGetPlate(out PlateKitchenObject plateKitchenObject))
+                {
+                    if (plateKitchenObject.TryAddIngredient(GetKitchenObjects().GetKitchenObjectsSo()))
+                    {
+                    GetKitchenObjects().DestroySelf();
+                    }
+                }
+                else
+                {
+                    //Not carrying plate but something else
+                    if (GetKitchenObjects().TryGetPlate(out plateKitchenObject))
+                    {
+                        if(plateKitchenObject.TryAddIngredient(player.GetKitchenObjects().GetKitchenObjectsSo()))
+                        {
+                            player.GetKitchenObjects().DestroySelf();
+                        }
+                    }
+                }
             }
             else
             {
@@ -35,7 +51,4 @@ public class ClearCounter : BaseCounter
             }
         }
     }
-
-   
-
 }

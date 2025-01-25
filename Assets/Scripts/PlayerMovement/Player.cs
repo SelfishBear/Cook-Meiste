@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, IKitchenObjectParent
 {
-    
-    
     public static Player Instance { get; private set; }
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChanged;
 
@@ -12,19 +10,18 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     {
         public BaseCounter selectedCounter;
     }
-    
+
     [SerializeField] private float _speed = 0f;
     [SerializeField] private float _rotSpeed = 0f;
     [SerializeField] private LayerMask counterLayerMask;
-    
-    
+
+
     public GameInput _gameInput;
     private bool _isWalking;
     private Vector3 lastInteractDir;
     private BaseCounter selectedCounter;
     private KitchenObjects _kitchenObjects;
     [SerializeField] private Transform kitchenObjectHoldPoint;
-
 
 
     private void Start()
@@ -68,7 +65,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
 
     private void HandleInteractions()
     {
-        float interactDistance = 2f; 
+        float interactDistance = 2f;
         Vector2 inputVector = _gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
         if (moveDir != Vector3.zero)
@@ -76,19 +73,19 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             lastInteractDir = moveDir;
         }
 
-        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, counterLayerMask))
+        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance,
+                counterLayerMask))
         {
             if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter))
             {
                 if (baseCounter != selectedCounter)
                 {
-                   SetSelectedCounter(baseCounter);
+                    SetSelectedCounter(baseCounter);
                 }
             }
             else
             {
-               SetSelectedCounter(null); 
-               
+                SetSelectedCounter(null);
             }
         }
         else
@@ -96,6 +93,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             SetSelectedCounter(null);
         }
     }
+
     private void HandleMovement()
     {
         float _moveDistance = _speed * Time.deltaTime;
@@ -103,13 +101,15 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         float _playerHeight = 2f;
         Vector2 inputVector = _gameInput.GetMovementVectorNormalized();
         Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
-        bool _canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * _playerHeight, _playerRadius, moveDir, _moveDistance);
+        bool _canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * _playerHeight,
+            _playerRadius, moveDir, _moveDistance);
         if (!_canMove)
         {
             //Нельзя идти по modeDir;
             //Попытка ходьбы по X;
             Vector3 moveDirX = new Vector3(moveDir.x, 0, 0).normalized;
-            _canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * _playerHeight, _playerRadius, moveDirX, _moveDistance);
+            _canMove = moveDir.x != 0 && !Physics.CapsuleCast(transform.position,
+                transform.position + Vector3.up * _playerHeight, _playerRadius, moveDirX, _moveDistance);
             if (_canMove)
             {
                 moveDir = moveDirX;
@@ -117,7 +117,8 @@ public class Player : MonoBehaviour, IKitchenObjectParent
             else
             {
                 Vector3 moveDirZ = new Vector3(0, 0, moveDir.z).normalized;
-                _canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * _playerHeight, _playerRadius, moveDirZ, _moveDistance);
+                _canMove = moveDir.z != 0 && !Physics.CapsuleCast(transform.position,
+                    transform.position + Vector3.up * _playerHeight, _playerRadius, moveDirZ, _moveDistance);
                 if (_canMove)
                 {
                     moveDir = moveDirZ;
@@ -128,14 +129,16 @@ public class Player : MonoBehaviour, IKitchenObjectParent
                 }
             }
         }
+
         if (_canMove)
         {
-         transform.position += moveDir * _moveDistance;
+            transform.position += moveDir * _moveDistance;
         }
-        
-        _isWalking = moveDir != Vector3.zero; 
+
+        _isWalking = moveDir != Vector3.zero;
         transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * _rotSpeed);
     }
+
     public bool IsWalking()
     {
         return _isWalking;
@@ -167,7 +170,7 @@ public class Player : MonoBehaviour, IKitchenObjectParent
     }
 
     public void ClearKitchenObjects()
-    { 
+    {
         _kitchenObjects = null;
     }
 
@@ -176,4 +179,3 @@ public class Player : MonoBehaviour, IKitchenObjectParent
         return _kitchenObjects != null;
     }
 }
-
