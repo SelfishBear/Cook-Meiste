@@ -3,9 +3,11 @@ using System;
 
 public class CuttingCounter : BaseCounter, IHasProgress
 {
+    public static event EventHandler OnAnyCut;
     public event EventHandler OnCut;
-    public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged; 
-    
+
+    public event EventHandler<IHasProgress.OnProgressChangedEventArgs> OnProgressChanged;
+
     [SerializeField] private CuttingRecipeSO[] _cuttingRecipeSOArray;
     private int _cuttingProgress;
 
@@ -22,7 +24,8 @@ public class CuttingCounter : BaseCounter, IHasProgress
                     //Player carrying something that can be CUT
                     player.GetKitchenObjects().SetKitchenObjectParent(this);
                     _cuttingProgress = 0;
-                    CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObjects().GetKitchenObjectsSo());
+                    CuttingRecipeSO cuttingRecipeSO =
+                        GetCuttingRecipeSOWithInput(GetKitchenObjects().GetKitchenObjectsSo());
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
                     {
                         progressNormalized = (float)_cuttingProgress / cuttingRecipeSO.cuttingProgressMax
@@ -62,7 +65,10 @@ public class CuttingCounter : BaseCounter, IHasProgress
         {
             //There is a KO here and it can be cut
             _cuttingProgress++;
+            
             OnCut?.Invoke(this, EventArgs.Empty);
+            OnAnyCut?.Invoke(this, EventArgs.Empty);
+            
             CuttingRecipeSO cuttingRecipeSO = GetCuttingRecipeSOWithInput(GetKitchenObjects().GetKitchenObjectsSo());
             OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangedEventArgs
             {
